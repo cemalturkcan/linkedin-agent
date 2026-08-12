@@ -380,6 +380,7 @@ export interface Settings {
   }
   roles: {
     seniority: { min: string; max: string }
+    postingLanguages: string[]
     excludeStacks: string[]
     excludeIndustries: string[]
     contractTypes: string[]

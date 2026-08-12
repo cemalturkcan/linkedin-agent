@@ -300,6 +300,19 @@ export function SettingsView({ settings, profile, busy, onSave }: SettingsViewPr
           </Section>
 
           <Section
+            title="posting language"
+            hint="the languages you can apply in. an advert written in anything else is skipped on that alone. left empty, the agent uses the languages your cvs are written in."
+          >
+            <TagEditor
+              id="posting-languages"
+              values={roles.postingLanguages}
+              placeholder="a two letter code"
+              transform={(value) => value.toLowerCase().replace(/[^a-z]/g, '').slice(0, 2)}
+              onChange={(postingLanguages) => editGroup('roles', { postingLanguages })}
+            />
+          </Section>
+
+          <Section
             title="excluded stacks"
             hint="a posting whose core is built on one of these is skipped even when the title fits. a passing mention is not an exclusion."
           >

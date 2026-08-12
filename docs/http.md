@@ -59,9 +59,13 @@ attaching the wrong resume is worse than a duplicate.
 The name itself ships empty, and empty means the person has not chosen one. `GET` then answers with
 the name their own cv files carry when every file in the folder carries the same one, and with
 `resume.pdf` when they disagree. It costs no model call: it is the file name on disk, not a reading
-of the cv. The same rule already fills the resume languages from the folder. Nothing that narrows
-the search is filled this way: places stay empty and the seniority range stays open, because those
-bound what the planner may look for and that is the person's call.
+of the cv.
+
+The same rule fills two more fields from the folder. The resume languages, and the posting languages
+the search accepts: a person with an English and a Turkish cv is not shown adverts written in
+Spanish without having configured anything. All three are facts about files on disk. Nothing that
+narrows where the agent looks is filled this way: places stay empty and the seniority range stays
+open, because those bound what the planner may look for and that is the person's call.
 
 Every field ships with a neutral default. Locations start empty, and empty means the planner
 decides rather than blocked. Workplace defaults wide: onsite, hybrid and remote all acceptable,

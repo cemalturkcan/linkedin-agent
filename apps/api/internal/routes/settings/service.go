@@ -104,7 +104,15 @@ func decodeDocument(raw string) map[string]any {
 }
 
 func (s *Service) derived(ctx context.Context, current Settings) Settings {
-	return s.withUploadName(ctx, s.withResumeLanguages(ctx, current))
+	return s.withPostingLanguages(ctx, s.withUploadName(ctx, s.withResumeLanguages(ctx, current)))
+}
+
+func (s *Service) withPostingLanguages(ctx context.Context, current Settings) Settings {
+	if len(current.Roles.PostingLanguages) > 0 || s.languages == nil {
+		return current
+	}
+	current.Roles.PostingLanguages = s.languages.Languages(ctx)
+	return current
 }
 
 func (s *Service) withUploadName(ctx context.Context, current Settings) Settings {

@@ -94,6 +94,7 @@ func places(raw any) []Place {
 func roles(raw map[string]any) Roles {
 	fallback := Defaults().Roles
 	return Roles{
+		PostingLanguages:  languages(raw["postingLanguages"]),
 		Seniority:           seniority(group(raw["seniority"])),
 		ExcludeStacks:       list(raw["excludeStacks"]),
 		ExcludeIndustries:   list(raw["excludeIndustries"]),

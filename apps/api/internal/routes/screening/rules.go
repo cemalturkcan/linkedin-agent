@@ -1,6 +1,7 @@
 package screening
 
 import (
+	"slices"
 	"sort"
 	"strings"
 
@@ -15,6 +16,7 @@ const (
 	RulePayFloor       = "pay-floor"
 	RuleLocation       = "location"
 	RuleNonEasyApply   = "non-easy-apply"
+	RulePostingLang    = "posting-language"
 
 	KindCommute     = "commute"
 	KindRelocate    = "relocate"
@@ -241,6 +243,23 @@ func authorizationClause(authorization string) string {
 	return " Work authorization stands at: " + strings.TrimSuffix(line(authorization, 200), ".") + "."
 }
 
+func refuseLanguage(decision Verdict, rules Rules) *Routed {
+	accepted := rules.Settings.Roles.PostingLanguages
+	if len(accepted) == 0 {
+		return nil
+	}
+	written := strings.ToLower(strings.TrimSpace(decision.PostingLang))
+	if written == "" || written == "unclear" || slices.Contains(accepted, written) {
+		return nil
+	}
+	return &Routed{
+		Status: postings.StatusSkipped,
+		Reason: "written in " + written + ", and this person works in " +
+			strings.Join(accepted, ", ") + ".",
+		Rule: RulePostingLang,
+	}
+}
+
 func routeApply(posting Candidate, decision Verdict, rules Rules) Routed {
 	reason := reasonOf(decision.Reason)
 
@@ -250,6 +269,11 @@ func routeApply(posting Candidate, decision Verdict, rules Rules) Routed {
 			Reason: "recruiting agency posting, excluded by the company rules. " + reason,
 			Rule:   RuleAgency,
 		}
+	}
+
+	if refused := refuseLanguage(decision, rules); refused != nil {
+		refused.Reason += " " + reason
+		return *refused
 	}
 
 	floor := rules.Settings.Roles.MinCompensation

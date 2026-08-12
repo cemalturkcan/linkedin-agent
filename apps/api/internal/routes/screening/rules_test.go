@@ -283,3 +283,42 @@ func TestTheResumeLanguageFallsBackToWhatTheVariantHasOnDisk(t *testing.T) {
 		t.Fatalf("languages = %v", derived.Languages)
 	}
 }
+
+func TestAPostingWrittenInALanguageThePersonDoesNotWorkInIsSkipped(t *testing.T) {
+	current := baseSettings()
+	current.Roles.PostingLanguages = []string{"en", "tr"}
+	rules := NewRules(current, []string{"en"})
+
+	written := applying()
+	written.PostingLang = "es"
+	spanish := routeApply(posting("Acme", "Madrid, Spain", true), written, rules)
+	if spanish.Status != postings.StatusSkipped || spanish.Rule != RulePostingLang {
+		t.Fatalf("status = %q rule = %q, want a language skip", spanish.Status, spanish.Rule)
+	}
+	if !strings.Contains(spanish.Reason, "written in es") ||
+		!strings.Contains(spanish.Reason, "en, tr") {
+		t.Fatalf("reason = %q, it has to name both languages", spanish.Reason)
+	}
+
+	for _, language := range []string{"en", "TR", "", "unclear"} {
+		decision := applying()
+		decision.PostingLang = language
+		kept := routeApply(posting("Acme", "Madrid, Spain", true), decision, rules)
+		if kept.Status != postings.StatusInbox {
+			t.Fatalf("postingLang %q routed to %q, want the inbox", language, kept.Status)
+		}
+	}
+}
+
+func TestNoLanguageConfiguredDropsNothingOnLanguage(t *testing.T) {
+	current := baseSettings()
+	current.Roles.PostingLanguages = nil
+	rules := NewRules(current, []string{"en"})
+
+	decision := applying()
+	decision.PostingLang = "es"
+	kept := routeApply(posting("Acme", "Madrid, Spain", true), decision, rules)
+	if kept.Status != postings.StatusInbox {
+		t.Fatalf("status = %q, want the inbox", kept.Status)
+	}
+}

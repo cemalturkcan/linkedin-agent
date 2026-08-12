@@ -88,6 +88,7 @@ type Compensation struct {
 
 type Roles struct {
 	Seniority           Seniority    `json:"seniority"`
+	PostingLanguages    []string     `json:"postingLanguages"`
 	ExcludeStacks       []string     `json:"excludeStacks"`
 	ExcludeIndustries   []string     `json:"excludeIndustries"`
 	ContractTypes       []string     `json:"contractTypes"`
@@ -150,6 +151,7 @@ func Defaults() Settings {
 		},
 		Roles: Roles{
 			Seniority:           Seniority{Min: SeniorityLadder[0], Max: last(SeniorityLadder)},
+			PostingLanguages:    []string{},
 			ExcludeStacks:       []string{},
 			ExcludeIndustries:   []string{},
 			ContractTypes:       append([]string{}, ContractTypes...),

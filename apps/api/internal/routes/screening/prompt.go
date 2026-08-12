@@ -266,6 +266,13 @@ func rulesBlock(rules Rules) string {
 		lines = append(lines, "- Pay floor: none configured. Never reject on compensation.")
 	}
 
+	if written := current.Roles.PostingLanguages; len(written) > 0 {
+		lines = append(lines, "- Works in "+list(written, nothingRecorded)+
+			". A posting written in another language is one they cannot apply to, and the server skips it on that alone.")
+	} else {
+		lines = append(lines, "- No language is configured, so no advert is rejected for the language it is written in.")
+	}
+
 	if current.Companies.ExcludeAgencies {
 		lines = append(lines,
 			"- Recruiting and staffing agencies are excluded. Set agency=true when the hiring company is an agency, a body shop or a consultancy posting on behalf of an unnamed client; the server turns that into the skip.")
@@ -406,6 +413,14 @@ func enforcedBlock(rules Rules) string {
 	} else {
 		lines = append(lines,
 			"7. An apply on a posting the extension cannot auto-fill is SKIPPED, because this person turned those off.")
+	}
+	if written := current.Roles.PostingLanguages; len(written) > 0 {
+		lines = append(lines, "8. postingLang outside "+list(written, nothingRecorded)+
+			" becomes a skip. Report the language the advert is actually written in and let the rule "+
+			"land; postingLang=unclear is never dropped on language.")
+	} else {
+		lines = append(lines,
+			"8. No language is enforced. postingLang is recorded and never drops a posting by itself.")
 	}
 	return strings.Join(lines, "\n")
 }

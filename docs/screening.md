@@ -29,6 +29,10 @@ The model judges. The code then enforces what is not a judgement call:
 
 - a blocked company never passes
 - a recruiting agency is dropped when the user excluded agencies
+- a posting written in a language the person does not work in is dropped, and the reason names the
+  language. An undecided `postingLang` is never dropped on language, because a guess about the
+  language is not evidence about the job. The accepted list ships empty, which reads as the
+  languages the person's own cvs are written in
 - a company applied to, or one whose posting the person opened themselves, inside the cooldown is
   dropped, and the reason says which of the two it was
 - the same role reposted, or posted in several cities, collapses to one record
