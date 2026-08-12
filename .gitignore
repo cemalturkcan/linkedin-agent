@@ -1,0 +1,12 @@
+node_modules/
+apps/api/.tools/
+apps/api/bin/
+apps/api/tmp/
+apps/api/data/
+apps/extension/dist/
+.idea/
+.vscode/
+.DS_Store
+*.db
+*.db-shm
+*.db-wal

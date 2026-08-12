@@ -1,0 +1,31 @@
+{
+  "shape": "jobs/jobPostings/:id with WebFullJobPosting-65, captured live: applyingInfo is a reference and the record sits in included",
+  "data": {
+    "entityUrn": "urn:li:fs_normalized_jobPosting:4051234567",
+    "description": { "text": "We are hiring." },
+    "*applyingInfo": "urn:li:fs_jobApplyingInfo:4051234567",
+    "closedAt": null,
+    "jobState": "LISTED"
+  },
+  "included": [
+    {
+      "$type": "com.linkedin.voyager.entities.shared.JobApplyingInfo",
+      "entityUrn": "urn:li:fs_jobApplyingInfo:4051234567",
+      "applied": true,
+      "appliedAt": 1754870400000,
+      "closed": false
+    },
+    {
+      "entityUrn": "urn:li:fs_normalized_jobPosting:4051234567",
+      "description": {
+        "text": "We are hiring a backend engineer. You will own services in production, on call one week in six, and work with a small team."
+      },
+      "jobState": "LISTED"
+    },
+    {
+      "$type": "com.linkedin.voyager.organization.Company",
+      "entityUrn": "urn:li:fs_normalized_company:99",
+      "name": "Northwind"
+    }
+  ]
+}

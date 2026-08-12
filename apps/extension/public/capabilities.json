@@ -1,0 +1,15 @@
+{
+  "fetch": {
+    "place": true,
+    "rings": ["city", "country", "region", "worldwide"],
+    "ranges": ["r3600", "r21600", "r86400", "r604800"],
+    "easyApply": true,
+    "remoteOnly": true,
+    "sorts": ["DD"],
+    "keyword": true,
+    "pageSize": 25,
+    "maxPagesPerQuery": 8
+  },
+  "seenSet": true,
+  "autoAttach": true
+}

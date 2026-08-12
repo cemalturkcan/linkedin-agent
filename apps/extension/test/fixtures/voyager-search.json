@@ -1,0 +1,75 @@
+{
+  "shape": "voyagerJobsDashJobCards, normalized+json+2.1, as the legacy client parsed it against the real feed",
+  "data": {
+    "paging": {
+      "start": 0,
+      "count": 25,
+      "total": 61
+    }
+  },
+  "included": [
+    {
+      "$type": "com.linkedin.voyager.dash.search.SearchClusterViewModel",
+      "entityUrn": "urn:li:fsd_searchClusterViewModel:JOBS_SEARCH"
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      "entityUrn": "urn:li:fsd_jobPostingCard:(4051234567,JOBS_SEARCH)",
+      "jobPostingUrn": "urn:li:fsd_jobPosting:4051234567",
+      "title": { "text": "Backend Engineer" },
+      "primaryDescription": { "text": "Northwind" },
+      "secondaryDescription": { "text": "Remote" },
+      "footerItems": [
+        { "type": "LISTED_DATE", "timeAt": 1770000000000 },
+        { "type": "EASY_APPLY_TEXT", "text": "Easy Apply" }
+      ]
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      "entityUrn": "urn:li:fsd_jobPostingCard:(4051234568,JOBS_SEARCH)",
+      "jobPostingUrn": "urn:li:fsd_jobPosting:4051234568",
+      "title": { "text": "Yazılım Geliştirici" },
+      "primaryDescription": { "text": "Meridian" },
+      "secondaryDescription": { "text": "Hybrid" },
+      "repostedJob": true,
+      "repostedAt": 1770000600000,
+      "footerItems": [
+        { "type": "REPOSTED_DATE", "timeAt": 1770000600000 },
+        { "type": "LISTED_DATE", "timeAt": 1769000000000 }
+      ]
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      "entityUrn": "urn:li:fsd_jobPostingCard:(4051234567,JOBS_SEARCH)",
+      "jobPostingUrn": "urn:li:fsd_jobPosting:4051234567",
+      "title": { "text": "Backend Engineer" },
+      "primaryDescription": { "text": "Northwind" },
+      "secondaryDescription": { "text": "Remote" },
+      "footerItems": []
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      "entityUrn": "urn:li:fsd_jobPostingCard:(4051234569,JOB_COLLECTIONS)",
+      "jobPostingUrn": "urn:li:fsd_jobPosting:4051234569",
+      "title": { "text": "Recommended For You" },
+      "primaryDescription": { "text": "Elsewhere" },
+      "footerItems": []
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      "entityUrn": "urn:li:fsd_jobPostingCard:(4051234570,JOBS_SEARCH)",
+      "jobPostingUrn": "urn:li:fsd_jobPosting:4051234570",
+      "primaryDescription": { "text": "No Title Inc" },
+      "footerItems": []
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      "entityUrn": "urn:li:fsd_jobPostingCard:(4051234571,JOBS_SEARCH)",
+      "jobPostingUrn": "urn:li:fsd_jobPosting:4051234571",
+      "jobPostingTitle": "Platform Engineer",
+      "primaryDescription": { "text": "Harborlight" },
+      "secondaryDescription": { "text": "Onsite" },
+      "footerItems": [{ "type": "LISTED_DATE", "timeAt": 1769900000000 }]
+    }
+  ]
+}

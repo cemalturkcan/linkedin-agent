@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "linkedin agent",
+  "version": "0.1.5",
+  "minimum_chrome_version": "114",
+  "description": "The interface for a local job-hunt agent: the feed it screened, the round it planned, and the cv it picked.",
+  "action": {
+    "default_title": "linkedin agent"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  },
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/jobs/*"],
+      "js": ["content/linkedin.js", "content/apply.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["storage", "sidePanel", "tabs", "scripting", "cookies", "alarms"],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ]
+}

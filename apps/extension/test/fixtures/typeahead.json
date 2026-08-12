@@ -1,0 +1,36 @@
+{
+  "shape": "typeahead/hitsV2 answers in two shapes: flat hits that carry their own text, and normalized hits that are urn strings with the names in included",
+  "flat": {
+    "elements": [
+      {
+        "text": { "text": "Rotterdam, South Holland, Netherlands" },
+        "targetUrn": "urn:li:fs_geo:102135806",
+        "type": "GEO"
+      },
+      {
+        "text": { "text": "Rotterdam, Missouri, United States" },
+        "targetUrn": "urn:li:fs_geo:105011081",
+        "type": "GEO"
+      }
+    ]
+  },
+  "normalized": {
+    "data": {
+      "elements": ["urn:li:fsd_geo:100565514", "urn:li:fsd_geo:101282230"]
+    },
+    "included": [
+      {
+        "entityUrn": "urn:li:fsd_geo:101282230",
+        "defaultLocalizedName": "Germany"
+      },
+      {
+        "entityUrn": "urn:li:fsd_geo:100565514",
+        "defaultLocalizedName": "Munich, Bavaria, Germany"
+      }
+    ]
+  },
+  "empty": {
+    "data": { "elements": [] },
+    "included": []
+  }
+}

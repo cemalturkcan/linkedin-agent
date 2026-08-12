@@ -1,0 +1,87 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    schema: "internal/app/store/schema.sql"
+    queries: "internal/app/trace/queries.sql"
+    gen:
+      go:
+        package: "tracedb"
+        out: "internal/app/trace/gen"
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
+  - engine: "sqlite"
+    schema: "internal/app/store/schema.sql"
+    queries: "internal/routes/settings/queries.sql"
+    gen:
+      go:
+        package: "settingsdb"
+        out: "internal/routes/settings/gen"
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
+  - engine: "sqlite"
+    schema: "internal/app/store/schema.sql"
+    queries: "internal/routes/resumes/queries.sql"
+    gen:
+      go:
+        package: "resumesdb"
+        out: "internal/routes/resumes/gen"
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
+  - engine: "sqlite"
+    schema: "internal/app/store/schema.sql"
+    queries: "internal/routes/indexer/queries.sql"
+    gen:
+      go:
+        package: "indexerdb"
+        out: "internal/routes/indexer/gen"
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
+  - engine: "sqlite"
+    schema: "internal/app/store/schema.sql"
+    queries: "internal/routes/traces/queries.sql"
+    gen:
+      go:
+        package: "tracesdb"
+        out: "internal/routes/traces/gen"
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
+  - engine: "sqlite"
+    schema: "internal/app/store/schema.sql"
+    queries: "internal/routes/plugin/queries.sql"
+    gen:
+      go:
+        package: "plugindb"
+        out: "internal/routes/plugin/gen"
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
+  - engine: "sqlite"
+    schema: "internal/app/store/schema.sql"
+    queries: "internal/routes/planner/queries.sql"
+    gen:
+      go:
+        package: "plannerdb"
+        out: "internal/routes/planner/gen"
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
+  - engine: "sqlite"
+    schema: "internal/app/store/schema.sql"
+    queries: "internal/routes/postings/queries.sql"
+    gen:
+      go:
+        package: "postingsdb"
+        out: "internal/routes/postings/gen"
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
+        rename:
+          url: "URL"
+  - engine: "sqlite"
+    schema: "internal/app/store/schema.sql"
+    queries: "internal/routes/screening/queries.sql"
+    gen:
+      go:
+        package: "screeningdb"
+        out: "internal/routes/screening/gen"
+        emit_pointers_for_null_types: true
+        omit_unused_structs: true
+        rename:
+          url: "URL"

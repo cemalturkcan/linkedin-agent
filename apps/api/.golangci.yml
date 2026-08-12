@@ -1,0 +1,80 @@
+version: "2"
+
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - canonicalheader
+    - containedctx
+    - contextcheck
+    - copyloopvar
+    - dupl
+    - durationcheck
+    - errchkjson
+    - errorlint
+    - errname
+    - exptostd
+    - fatcontext
+    - forcetypeassert
+    - gocheckcompilerdirectives
+    - gochecksumtype
+    - gocognit
+    - gocritic
+    - gomoddirectives
+    - gosec
+    - intrange
+    - interfacebloat
+    - loggercheck
+    - maintidx
+    - makezero
+    - misspell
+    - modernize
+    - musttag
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - perfsprint
+    - predeclared
+    - reassign
+    - recvcheck
+    - rowserrcheck
+    - sloglint
+    - sqlclosecheck
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - unqueryvet
+    - usestdlibvars
+    - wastedassign
+  exclusions:
+    rules:
+      - path: internal/app/credentials/
+        linters:
+          - gosec
+        text: "G101"
+      - path: internal/routes/indexer/
+        linters:
+          - gosec
+        text: "G204"
+      - path: internal/routes/(indexer|resumes)/
+        linters:
+          - gosec
+        text: "G304"
+      - path: _test\.go
+        linters:
+          - gosec
+        text: "G101|G204|G304"
+
+formatters:
+  enable:
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - api

@@ -1,0 +1,32 @@
+{
+  "name": "linkedin-agent-extension",
+  "version": "0.1.5",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc --noEmit && vite build && bun run build:executor",
+    "build:executor": "bun build src/worker/main.ts --target=browser --format=iife --outfile=dist/executor.js",
+    "test": "bun test",
+    "live": "bun run scripts/live-check.ts",
+    "surfaces": "bun run scripts/surface-check.ts",
+    "desk": "bun run scripts/desk-check.ts"
+  },
+  "dependencies": {
+    "clsx": "2.1.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwind-merge": "3.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/bun": "1.3.14",
+    "@types/chrome": "0.2.5",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vite": "8.2.1"
+  }
+}
