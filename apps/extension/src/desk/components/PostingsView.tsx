@@ -44,11 +44,27 @@ const VERDICT_WORDS: Record<string, string> = {
 }
 
 export const ANY_TAG = ''
+export const ANY_COUNTRY = ''
 
-export function filterPostings(rows: Posting[], filter: PostingFilter, tag = ANY_TAG): Posting[] {
+const WORKPLACE_SUFFIX = /\s*\([^)]*\)\s*$/
+
+export function countryOf(location: string | null | undefined): string {
+  const named = String(location ?? '').replace(WORKPLACE_SUFFIX, '').trim()
+  if (!named) return ''
+  return (named.split(',').pop() ?? '').trim()
+}
+
+export function filterPostings(
+  rows: Posting[],
+  filter: PostingFilter,
+  tag = ANY_TAG,
+  country = ANY_COUNTRY,
+): Posting[] {
   const inList = filter === 'all' ? rows : rows.filter((row) => row.status === filter)
   const tagged = tag === ANY_TAG ? inList : inList.filter((row) => row.resumeCode === tag)
-  return oldestFirst(tagged)
+  const placed =
+    country === ANY_COUNTRY ? tagged : tagged.filter((row) => countryOf(row.location) === country)
+  return oldestFirst(placed)
 }
 
 export interface Tag {
@@ -57,15 +73,28 @@ export interface Tag {
   count: number
 }
 
-export function tagsIn(rows: Posting[], labels: Record<string, string>): Tag[] {
+function counted(rows: Posting[], keyOf: (row: Posting) => string): Map<string, number> {
   const counts = new Map<string, number>()
   for (const row of rows) {
-    if (!row.resumeCode) continue
-    counts.set(row.resumeCode, (counts.get(row.resumeCode) ?? 0) + 1)
+    const key = keyOf(row)
+    if (!key) continue
+    counts.set(key, (counts.get(key) ?? 0) + 1)
   }
+  return counts
+}
+
+function ranked(counts: Map<string, number>, labels: Record<string, string>): Tag[] {
   return [...counts.entries()]
     .map(([code, count]) => ({ code, label: labels[code] ?? code, count }))
     .sort((left, right) => right.count - left.count || left.code.localeCompare(right.code))
+}
+
+export function tagsIn(rows: Posting[], labels: Record<string, string>): Tag[] {
+  return ranked(counted(rows, (row) => row.resumeCode ?? ''), labels)
+}
+
+export function countriesIn(rows: Posting[]): Tag[] {
+  return ranked(counted(rows, (row) => countryOf(row.location)), {})
 }
 
 function Line({ term, children }: { term: string; children: string }) {
@@ -109,6 +138,56 @@ function origin(posting: Posting): string {
   ]
     .filter(Boolean)
     .join(', ')
+}
+
+function Chips({
+  term,
+  chosen,
+  chips,
+  onChoose,
+}: {
+  term: string
+  chosen: string
+  chips: Tag[]
+  onChoose(value: string): void
+}) {
+  if (chips.length === 0) return null
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      <span className="label mr-1 w-8 shrink-0 text-muted">{term}</span>
+      <button
+        type="button"
+        aria-pressed={chosen === ''}
+        onClick={() => onChoose('')}
+        className={cn(
+          'label h-6 border border-hairline px-2',
+          chosen === '' ? 'bg-active text-onactive' : 'text-muted hover:bg-hover hover:text-ink',
+        )}
+      >
+        any
+      </button>
+      {chips.map((entry) => (
+        <button
+          key={entry.code}
+          type="button"
+          aria-pressed={chosen === entry.code}
+          onClick={() => onChoose(chosen === entry.code ? '' : entry.code)}
+          className={cn(
+            'label flex h-6 items-center gap-1.5 border border-hairline px-2',
+            chosen === entry.code
+              ? 'bg-active text-onactive'
+              : 'text-muted hover:bg-hover hover:text-ink',
+          )}
+        >
+          <span>{entry.label}</span>
+          <span className={cn('grid-num text-micro', chosen === entry.code ? 'text-onactive/70' : '')}>
+            {entry.count}
+          </span>
+        </button>
+      ))}
+    </div>
+  )
 }
 
 function OutcomeRecorder({
@@ -223,12 +302,15 @@ interface PostingsViewProps {
   filter: PostingFilter
   tag: string
   tags: Tag[]
+  country: string
+  countries: Tag[]
   cursor: number
   openedId: string | null
   reflection: string | null
   busy: string | null
   onFilter(filter: PostingFilter): void
   onTag(tag: string): void
+  onCountry(country: string): void
   onCursor(index: number): void
   onOpen(id: string | null): void
   onVisit(posting: Posting): void
@@ -242,12 +324,15 @@ export function PostingsView({
   filter,
   tag,
   tags,
+  country,
+  countries,
   cursor,
   openedId,
   reflection,
   busy,
   onFilter,
   onTag,
+  onCountry,
   onCursor,
   onOpen,
   onVisit,
@@ -296,41 +381,8 @@ export function PostingsView({
         </Action>
       </div>
 
-      {tags.length > 0 ? (
-        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-          <span className="label mr-1 text-muted">cv</span>
-          <button
-            type="button"
-            aria-pressed={tag === ANY_TAG}
-            onClick={() => onTag(ANY_TAG)}
-            className={cn(
-              'label h-6 border border-hairline px-2',
-              tag === ANY_TAG ? 'bg-active text-onactive' : 'text-muted hover:bg-hover hover:text-ink',
-            )}
-          >
-            any
-          </button>
-          {tags.map((entry) => (
-            <button
-              key={entry.code}
-              type="button"
-              aria-pressed={tag === entry.code}
-              onClick={() => onTag(tag === entry.code ? ANY_TAG : entry.code)}
-              className={cn(
-                'label flex h-6 items-center gap-1.5 border border-hairline px-2',
-                tag === entry.code
-                  ? 'bg-active text-onactive'
-                  : 'text-muted hover:bg-hover hover:text-ink',
-              )}
-            >
-              <span>{entry.label}</span>
-              <span className={cn('grid-num text-micro', tag === entry.code ? 'text-onactive/70' : '')}>
-                {entry.count}
-              </span>
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <Chips term="cv" chosen={tag} chips={tags} onChoose={onTag} />
+      <Chips term="place" chosen={country} chips={countries} onChoose={onCountry} />
 
       {reflection ? <Note term="reflector">{reflection}</Note> : null}
 

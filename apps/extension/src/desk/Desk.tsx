@@ -6,9 +6,11 @@ import { useHotkeys, type HotkeyHandler } from '@/lib/useHotkeys'
 import { cn } from '@/lib/utils'
 import { Keycap } from '@/panel/components/Keycap'
 import {
+  ANY_COUNTRY,
   ANY_TAG,
   PostingsView,
   filterPostings,
+  countriesIn,
   tagsIn,
   type PostingFilter,
 } from '@/desk/components/PostingsView'
@@ -119,6 +121,7 @@ export function Desk() {
   const [openedPosting, setOpenedPosting] = useState<string | null>(null)
   const [filter, setFilter] = useState<PostingFilter>('inbox')
   const [tag, setTag] = useState<string>(ANY_TAG)
+  const [country, setCountry] = useState<string>(ANY_COUNTRY)
   const [reflection, setReflection] = useState<string | null>(null)
 
   useEffect(() => {
@@ -168,10 +171,14 @@ export function Desk() {
     () => filterPostings(state.jobs.value ?? [], filter),
     [filter, state.jobs.value],
   )
-  const tags = useMemo(() => tagsIn(inList, labels), [inList, labels])
+  const tags = useMemo(
+    () => tagsIn(filterPostings(inList, 'all', ANY_TAG, country), labels),
+    [inList, labels, country],
+  )
+  const countries = useMemo(() => countriesIn(filterPostings(inList, 'all', tag)), [inList, tag])
   const postings = useMemo(
-    () => filterPostings(state.jobs.value ?? [], filter, tag),
-    [filter, tag, state.jobs.value],
+    () => filterPostings(state.jobs.value ?? [], filter, tag, country),
+    [filter, tag, country, state.jobs.value],
   )
   const traces = state.traces.value?.traces ?? []
   const rounds = (state.plan.value?.cycle ? 1 : 0) + (state.plan.value?.history.length ?? 0)
@@ -364,6 +371,8 @@ export function Desk() {
               filter={filter}
               tag={tag}
               tags={tags}
+              country={country}
+              countries={countries}
               cursor={cursor}
               openedId={openedPosting}
               onVisit={(posting) => void state.actions.openPosting(posting)}
@@ -372,10 +381,15 @@ export function Desk() {
               onFilter={(next) => {
                 setFilter(next)
                 setTag(ANY_TAG)
+                setCountry(ANY_COUNTRY)
                 setCursor(0)
               }}
               onTag={(next) => {
                 setTag(next)
+                setCursor(0)
+              }}
+              onCountry={(next) => {
+                setCountry(next)
                 setCursor(0)
               }}
               onCursor={setCursor}

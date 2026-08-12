@@ -11,7 +11,14 @@ import type {
   TraceList,
 } from '@/lib/agent/types'
 import { landingPlace, placeFromHash } from '@/desk/Desk'
-import { ANY_TAG, PostingsView, filterPostings, tagsIn } from '@/desk/components/PostingsView'
+import {
+  ANY_TAG,
+  PostingsView,
+  countriesIn,
+  countryOf,
+  filterPostings,
+  tagsIn,
+} from '@/desk/components/PostingsView'
 import { ProfileView } from '@/desk/components/ProfileView'
 import { SetupView } from '@/desk/components/SetupView'
 import { TraceView } from '@/desk/components/TraceView'
@@ -230,12 +237,15 @@ test('the postings view carries the detail the panel truncates', () => {
       filter: 'applied',
       tag: '',
       tags: [],
+      country: '',
+      countries: [],
       cursor: 0,
       openedId: 'p1',
       reflection: null,
       busy: null,
       onFilter: () => {},
       onTag: () => {},
+      onCountry: () => {},
       onCursor: () => {},
       onOpen: () => {},
       onVisit: () => {},
@@ -261,12 +271,15 @@ test('an opened posting names the verdict, the score and the round that found it
       filter: 'all',
       tag: '',
       tags: [],
+      country: '',
+      countries: [],
       cursor: 0,
       openedId: 'p1',
       reflection: null,
       busy: null,
       onFilter: () => {},
       onTag: () => {},
+      onCountry: () => {},
       onCursor: () => {},
       onOpen: () => {},
       onVisit: () => {},
@@ -285,12 +298,15 @@ test('an opened posting names the verdict, the score and the round that found it
       filter: 'all',
       tag: '',
       tags: [],
+      country: '',
+      countries: [],
       cursor: 0,
       openedId: 'p1',
       reflection: null,
       busy: null,
       onFilter: () => {},
       onTag: () => {},
+      onCountry: () => {},
       onCursor: () => {},
       onOpen: () => {},
       onVisit: () => {},
@@ -322,12 +338,15 @@ test('the work list draws oldest first, so the longest wait is the first row', (
       filter: 'all',
       tag: '',
       tags: [],
+      country: '',
+      countries: [],
       cursor: 0,
       openedId: null,
       reflection: null,
       busy: null,
       onFilter: () => {},
       onTag: () => {},
+      onCountry: () => {},
       onCursor: () => {},
       onOpen: () => {},
       onVisit: () => {},
@@ -425,4 +444,35 @@ test('the panel sends a fresh install to setup instead of drawing empty lists', 
   expect(panel).toContain('!state.setup.value.configured')
   expect(panel).toContain("openDesk('setup')")
   expect(panel).toContain('nothing is set up yet')
+})
+
+test('a posting is filed under the country its location ends with', () => {
+  expect(countryOf('Üsküdar, Istanbul, Türkiye (Hybrid)')).toBe('Türkiye')
+  expect(countryOf('Istanbul, Türkiye (Remote)')).toBe('Türkiye')
+  expect(countryOf('Türkiye (Remote)')).toBe('Türkiye')
+  expect(countryOf('Berlin, Germany')).toBe('Germany')
+  expect(countryOf('European Union (Remote)')).toBe('European Union')
+  expect(countryOf('')).toBe('')
+  expect(countryOf(null)).toBe('')
+})
+
+test('the work view can be narrowed to one country, and the counts follow', () => {
+  const rows = [
+    posting({ id: 'a', status: 'inbox', resumeCode: 'JA', location: 'Istanbul, Türkiye (Hybrid)', listedAt: 1 }),
+    posting({ id: 'b', status: 'inbox', resumeCode: 'JA', location: 'Berlin, Germany (Remote)', listedAt: 2 }),
+    posting({ id: 'c', status: 'inbox', resumeCode: 'FR', location: 'Ankara, Türkiye (On-site)', listedAt: 3 }),
+    posting({ id: 'd', status: 'skipped', resumeCode: 'JA', location: 'Istanbul, Türkiye', listedAt: 4 }),
+  ]
+  const inbox = filterPostings(rows, 'inbox')
+
+  expect(countriesIn(inbox)).toEqual([
+    { code: 'Türkiye', label: 'Türkiye', count: 2 },
+    { code: 'Germany', label: 'Germany', count: 1 },
+  ])
+  expect(filterPostings(rows, 'inbox', ANY_TAG, 'Türkiye').map((row) => row.id)).toEqual(['a', 'c'])
+  expect(filterPostings(rows, 'inbox', 'JA', 'Türkiye').map((row) => row.id)).toEqual(['a'])
+  expect(filterPostings(rows, 'all', ANY_TAG, 'Türkiye').map((row) => row.id)).toEqual(['a', 'c', 'd'])
+
+  const inTurkiye = filterPostings(inbox, 'all', ANY_TAG, 'Türkiye')
+  expect(tagsIn(inTurkiye, {}).map((entry) => entry.code)).toEqual(['FR', 'JA'])
 })

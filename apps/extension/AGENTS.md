@@ -62,9 +62,11 @@ place, so the panel and the desk cannot drift. That is why a list shrinks when y
 it: the posting is not lost, it is queued, and the queue is where the ones you took stand until
 LinkedIn says they were applied to.
 
-The work view narrows twice: by list, and by the cv the agent picked for the posting. The cv chips
-are drawn from the postings on screen, they carry the count, and they read as the variant's own
-name, so narrowing to the java ones is one click rather than a search.
+The work view narrows three ways: by list, by the cv the agent picked for the posting, and by the
+country the posting sits in. Both chip rows are drawn from the postings on screen and carry their
+count, and each row counts against the other one's choice, so the number on a chip is what clicking
+it gives. The country is the last part of LinkedIn's own location line with the workplace suffix
+removed, which is the only place in a posting that names a country at all.
 
 Nothing is set up on a fresh install, and an empty panel is a bad first sentence. When the api says
 no cv folder is configured the panel opens the desk on setup and says so in one line rather than
