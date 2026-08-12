@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AgentClient, type Failure, type Result } from '@/lib/agent/client'
 import { afterStatus, AgentStream, NEVER_LIVE, type StreamStatus } from '@/lib/agent/stream'
+import { coalesce } from '@/lib/coalesce'
 import { announceNow } from '@/lib/worker'
 import type {
   CredentialStatus,
@@ -154,6 +155,14 @@ export function useDeskState(client: AgentClient): DeskState & { actions: DeskAc
     const source = new AgentStream({ url: (cursor) => client.eventsUrl(cursor) })
     streamRef.current = source
 
+    const burstJobs = coalesce(() => void loadJobs())
+    const burstPlan = coalesce(() => void loadPlan())
+    const burstTraces = coalesce(() => void loadTraces())
+    const burstProfile = coalesce(() => {
+      void loadProfile()
+      void loadSetup()
+    })
+
     let track = NEVER_LIVE
     const offStatus = source.onStatus((status) => {
       setStream(status)
@@ -173,18 +182,17 @@ export function useDeskState(client: AgentClient): DeskState & { actions: DeskAc
           void loadCredentials()
           return
         case '/api/profile':
-          void loadProfile()
-          void loadSetup()
+          burstProfile()
           return
         case '/api/settings':
           void loadSettings()
           return
         case '/api/plan':
         case '/api/plugin':
-          void loadPlan()
+          burstPlan()
           return
         case '/api/jobs':
-          void loadJobs()
+          burstJobs()
           return
         default:
           return
@@ -207,7 +215,7 @@ export function useDeskState(client: AgentClient): DeskState & { actions: DeskAc
           return
         }
         setRunning((previous) => (previous && previous.id === id ? null : previous))
-        void loadTraces()
+        burstTraces()
         return
       }
       const id = Number(frame.data.id)
@@ -233,6 +241,10 @@ export function useDeskState(client: AgentClient): DeskState & { actions: DeskAc
       offStatus()
       offState()
       offDelta()
+      burstJobs.cancel()
+      burstPlan.cancel()
+      burstTraces.cancel()
+      burstProfile.cancel()
       source.stop()
       streamRef.current = null
     }

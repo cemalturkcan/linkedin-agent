@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "linkedin agent",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "minimum_chrome_version": "114",
   "description": "The interface for a local job-hunt agent: the feed it screened, the round it planned, and the cv it picked.",
   "action": {

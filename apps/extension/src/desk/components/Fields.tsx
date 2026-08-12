@@ -282,20 +282,21 @@ export function TagEditor({
   onChange,
 }: {
   id: string
-  values: string[]
+  values: string[] | null | undefined
   placeholder: string
   transform?(value: string): string
   onChange(values: string[]): void
 }) {
   const [entry, setEntry] = useState('')
+  const kept = Array.isArray(values) ? values : []
 
   function add() {
     const raw = entry.trim()
     if (!raw) return
     const next = transform ? transform(raw) : raw
     setEntry('')
-    if (!next || values.includes(next)) return
-    onChange([...values, next])
+    if (!next || kept.includes(next)) return
+    onChange([...kept, next])
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -304,9 +305,9 @@ export function TagEditor({
       add()
       return
     }
-    if (event.key === 'Backspace' && entry === '' && values.length > 0) {
+    if (event.key === 'Backspace' && entry === '' && kept.length > 0) {
       event.preventDefault()
-      onChange(values.slice(0, -1))
+      onChange(kept.slice(0, -1))
       return
     }
     blurOnEscape(event)
@@ -314,15 +315,15 @@ export function TagEditor({
 
   return (
     <div>
-      {values.length > 0 ? (
+      {kept.length > 0 ? (
         <div className="mb-1.5 flex flex-wrap gap-1">
-          {values.map((value) => (
+          {kept.map((value) => (
             <span
               key={value}
               className="flex h-5 items-center gap-1 border border-hairline pr-0.5 pl-1.5"
             >
               <span className="text-meta text-ink">{value}</span>
-              <Remove label={`remove ${value}`} onClick={() => onChange(values.filter((item) => item !== value))} />
+              <Remove label={`remove ${value}`} onClick={() => onChange(kept.filter((item) => item !== value))} />
             </span>
           ))}
         </div>

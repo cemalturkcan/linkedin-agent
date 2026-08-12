@@ -29,6 +29,7 @@ import {
 } from '@/lib/handled'
 import { countLists, groupLists, queueOnOpen, type ListKey } from '@/lib/lists'
 import { openTab } from '@/lib/open'
+import { coalesce } from '@/lib/coalesce'
 import { watchKey } from '@/lib/storage'
 import {
   BROAD_PRESET,
@@ -270,6 +271,10 @@ export function useAgentState(client: AgentClient): PanelState & { actions: Pane
     const source = new AgentStream({ url: (cursor) => client.eventsUrl(cursor) })
     streamRef.current = source
 
+    const burstJobs = coalesce(() => void loadJobs())
+    const burstPlan = coalesce(() => void loadPlan())
+    const burstProfile = coalesce(() => void loadProfile())
+
     let track = NEVER_LIVE
     const offStatus = source.onStatus((status) => {
       setStream(status)
@@ -288,16 +293,14 @@ export function useAgentState(client: AgentClient): PanelState & { actions: Pane
       }
       switch (frame.route) {
         case '/api/jobs':
-          void loadJobs()
+          burstJobs()
           return
         case '/api/plan':
-          void loadPlan()
-          return
         case '/api/plugin':
-          void loadPlan()
+          burstPlan()
           return
         case '/api/profile':
-          void loadProfile()
+          burstProfile()
           return
         case '/api/settings':
           void loadSettings()
@@ -314,6 +317,9 @@ export function useAgentState(client: AgentClient): PanelState & { actions: Pane
     return () => {
       offStatus()
       offState()
+      burstJobs.cancel()
+      burstPlan.cancel()
+      burstProfile.cancel()
       source.stop()
       streamRef.current = null
     }

@@ -369,6 +369,11 @@ func (s *Service) screenKey(ctx context.Context) string {
 	return s.screenKeys.ScreenKey(ctx)
 }
 
+func withoutBody(found Posting) Posting {
+	found.Description = ""
+	return found
+}
+
 func (s *Service) List(ctx context.Context, status string) ([]Posting, error) {
 	if status == "" {
 		status = ListAll
@@ -385,7 +390,7 @@ func (s *Service) List(ctx context.Context, status string) ([]Posting, error) {
 		}
 		postings := make([]Posting, 0, len(rows))
 		for _, row := range rows {
-			postings = append(postings, posting(postingsdb.JobsByStatusRow(row)))
+			postings = append(postings, withoutBody(posting(postingsdb.JobsByStatusRow(row))))
 		}
 		return postings, nil
 	}
@@ -398,7 +403,7 @@ func (s *Service) List(ctx context.Context, status string) ([]Posting, error) {
 	}
 	postings := make([]Posting, 0, len(rows))
 	for _, row := range rows {
-		postings = append(postings, posting(row))
+		postings = append(postings, withoutBody(posting(row)))
 	}
 	return postings, nil
 }

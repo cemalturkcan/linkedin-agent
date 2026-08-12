@@ -46,3 +46,11 @@ screening pass, and the model call itself.
 
 Idle reads as idle. A round that ended because the feed was mined out is a healthy round and says
 so, not an error.
+
+## Bursts
+
+A state event names a route to refetch, and a round emits one per verdict it commits. A surface that
+refetched on each of them turned a hundred verdicts into a hundred full list reads. Every
+event-driven refetch is coalesced instead: a burst inside the window costs one read, and a lone
+event still costs its own. The refetch after a stream recovery is not coalesced, because there is
+nothing to coalesce it with.

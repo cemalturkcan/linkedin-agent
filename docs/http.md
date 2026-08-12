@@ -105,6 +105,10 @@ closes it as failed with that termination reason, and stays on screen until the 
 | `GET /api/jobs/stale` | what predates a settings or CV change |
 | `POST /api/jobs/rescreen` | judge the stale ones again |
 
+`GET /api/jobs` answers with the rows a list draws and never the description body. The body is the
+bulk of a posting and no screen renders it, so shipping it turned every refresh into megabytes. The
+state stays, because whether a description was read is what the interface reports.
+
 A posting already handled is dropped before batching, no matter who sends it or how often. That
 guarantee lives on the server; the caches on the other side are optimisations.
 

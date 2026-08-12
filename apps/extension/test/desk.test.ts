@@ -7,6 +7,7 @@ import type {
   CredentialStatus,
   Posting,
   ProfileState,
+  SettingsDocument,
   SetupState,
   TraceList,
 } from '@/lib/agent/types'
@@ -20,6 +21,7 @@ import {
   tagsIn,
 } from '@/desk/components/PostingsView'
 import { ProfileView } from '@/desk/components/ProfileView'
+import { SettingsView } from '@/desk/components/SettingsView'
 import { SetupView } from '@/desk/components/SetupView'
 import { TraceView } from '@/desk/components/TraceView'
 import { outageLine, pending, type Resource } from '@/desk/useDeskState'
@@ -475,4 +477,71 @@ test('the work view can be narrowed to one country, and the counts follow', () =
 
   const inTurkiye = filterPostings(inbox, 'all', ANY_TAG, 'Türkiye')
   expect(tagsIn(inTurkiye, {}).map((entry) => entry.code)).toEqual(['FR', 'JA'])
+})
+
+test('a settings field the api has never heard of does not blank the screen', () => {
+  const older = {
+    settings: {
+      locations: {
+        places: [],
+        relocation: { open: true, targets: [], notes: '' },
+        workplace: { onsite: true, hybrid: true, remote: true, scope: 'global' },
+        authorization: '',
+      },
+      roles: {
+        seniority: { min: 'junior', max: 'staff' },
+        excludeStacks: [],
+        excludeIndustries: [],
+        contractTypes: ['full-time'],
+        minCompensation: { amount: 0, currency: '', period: 'year', hardFilter: false },
+        applyToNonEasyApply: false,
+      },
+      companies: { blocked: [], preferred: [], excludeAgencies: false, reapplyCooldownDays: 90, dedupe: true },
+      apply: {
+        autoAttach: true,
+        uploadFileName: 'my-cv.pdf',
+        uploadFileNameMode: 'one-name',
+        resumeLanguages: ['en'],
+        paused: false,
+      },
+      budget: {
+        maxQueriesPerCycle: 8,
+        maxScreenPerCycle: 200,
+        maxModelCallsPerCycle: 0,
+        maxPagesPerQuery: 15,
+        cycleMinutes: 60,
+        autoCycle: true,
+        dailyModelCallCap: 0,
+        retentionDays: 30,
+      },
+      harvest: {
+        newJobTarget: 100,
+        maxWideningSteps: 2,
+        roundDeadlineMs: 3600000,
+        requestDelayMs: 900,
+        requestTimeoutMs: 120000,
+      },
+      operatorNotes: '',
+    },
+    enums: {
+      seniorityLadder: ['junior', 'mid', 'senior', 'staff'],
+      locationKinds: ['commute'],
+      placeRings: ['city', 'country', 'region', 'worldwide'],
+      workplaceScopes: ['local', 'country', 'region', 'global'],
+      contractTypes: ['full-time'],
+      payPeriods: ['year'],
+      uploadNameModes: ['one-name', 'per-variant'],
+    },
+  } as unknown as SettingsDocument
+
+  const drawn = text(
+    createElement(SettingsView, {
+      settings: held(older),
+      profile: pending<ProfileState>(),
+      busy: null,
+      onSave: async () => true,
+    }),
+  )
+
+  expect(drawn).toContain('posting language')
 })
