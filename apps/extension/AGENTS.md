@@ -51,6 +51,11 @@ opens its detail here, `escape` closes it, `r` refetches, `i` re-reads the cvs a
 pause switch. Enter goes to the posting because that is what a person on a list of jobs wants, and
 the detail is a key of its own rather than the thing standing in the way.
 
+A surface fills itself once when it mounts and once more only when the stream comes back after
+dropping. The first connect is not a recovery: the data it would refetch was read milliseconds
+earlier, and refetching there doubled every screen's load. Recovery is a stream that was live, went
+down and came back, which is the only case where what is on screen can be behind.
+
 Opening a posting is an act, and both surfaces record it the same way: the tab opens and a posting
 that was proposed, in the inbox or waiting to be sent by hand, moves to the queue. One rule, one
 place, so the panel and the desk cannot drift. That is why a list shrinks when you press enter on

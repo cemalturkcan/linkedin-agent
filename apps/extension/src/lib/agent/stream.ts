@@ -15,6 +15,23 @@ export type StateEvent = (typeof STATE_EVENTS)[number]
 export type DeltaEvent = (typeof DELTA_EVENTS)[number]
 export type StreamStatus = 'connecting' | 'live' | 'down'
 
+export interface LiveTrack {
+  live: boolean
+  dropped: boolean
+}
+
+export const NEVER_LIVE: LiveTrack = { live: false, dropped: false }
+
+export function afterStatus(
+  track: LiveTrack,
+  status: StreamStatus,
+): { track: LiveTrack; refetch: boolean } {
+  if (status !== 'live') {
+    return { track: { live: false, dropped: track.dropped || track.live }, refetch: false }
+  }
+  return { track: { live: true, dropped: false }, refetch: track.dropped }
+}
+
 export type Payload = Record<string, unknown>
 
 export interface StateFrame {

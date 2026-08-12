@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { AgentStream, type EventSourceLike } from '@/lib/agent/stream'
+import { afterStatus, AgentStream, NEVER_LIVE, type EventSourceLike } from '@/lib/agent/stream'
 
 class FakeSource implements EventSourceLike {
   readonly listeners = new Map<string, (event: MessageEvent<string>) => void>()
@@ -135,4 +135,36 @@ test('an unparsable body is dropped rather than breaking the stream', async () =
 
   expect(frames).toEqual(['jobs'])
   expect(stream.cursor()).toBe('4')
+})
+
+test('the first connect refetches nothing, a reconnect refetches once', () => {
+  let track = NEVER_LIVE
+  const seen: boolean[] = []
+  const saw = (status: 'connecting' | 'live' | 'down') => {
+    const next = afterStatus(track, status)
+    track = next.track
+    seen.push(next.refetch)
+  }
+
+  saw('connecting')
+  saw('live')
+  expect(seen).toEqual([false, false])
+
+  saw('down')
+  saw('connecting')
+  saw('live')
+  expect(seen.slice(2)).toEqual([false, false, true])
+
+  saw('live')
+  expect(seen[seen.length - 1]).toBe(false)
+})
+
+test('a stream that never reaches live does not arm a refetch', () => {
+  let track = NEVER_LIVE
+  for (const status of ['connecting', 'down', 'connecting', 'down'] as const) {
+    const next = afterStatus(track, status)
+    track = next.track
+    expect(next.refetch).toBe(false)
+  }
+  expect(afterStatus(track, 'live').refetch).toBe(false)
 })

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AgentClient, type Failure, type Result } from '@/lib/agent/client'
-import { AgentStream, type StreamStatus } from '@/lib/agent/stream'
+import { afterStatus, AgentStream, NEVER_LIVE, type StreamStatus } from '@/lib/agent/stream'
 import type {
   PlanState,
   Posting,
@@ -270,12 +270,12 @@ export function useAgentState(client: AgentClient): PanelState & { actions: Pane
     const source = new AgentStream({ url: (cursor) => client.eventsUrl(cursor) })
     streamRef.current = source
 
-    let live = false
+    let track = NEVER_LIVE
     const offStatus = source.onStatus((status) => {
       setStream(status)
-      const back = status === 'live' && !live
-      live = status === 'live'
-      if (back) void refresh()
+      const seen = afterStatus(track, status)
+      track = seen.track
+      if (seen.refetch) void refresh()
     })
     const offState = source.onState((frame) => {
       if (frame.name === 'error') {

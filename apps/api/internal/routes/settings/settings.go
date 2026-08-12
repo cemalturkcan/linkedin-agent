@@ -174,7 +174,7 @@ func Defaults() Settings {
 			MaxScreenPerCycle:     200,
 			MaxModelCallsPerCycle: 0,
 			MaxPagesPerQuery:      15,
-			CycleMinutes:          10,
+			CycleMinutes:          60,
 			DailyModelCallCap:     0,
 			RetentionDays:         30,
 			AutoCycle:             true,
