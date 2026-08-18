@@ -8,6 +8,26 @@ Nothing about you is written into the code. The same checkout belongs to whoever
 name, your stack, your cities and the file your CV attaches under are all derived from the folder
 you point it at.
 
+[![Watch the 21-second tour](docs/media/promo-poster.png)](https://github.com/cemalturkcan/linkedin-agent/releases/download/promo-v1/promo.mp4)
+
+## What it does
+
+- **Aims the search for you.** Every hour a planner decides where to look, using the places you
+  set in settings — which city, how wide a ring around it, how far back — and the profile it
+  derived from your CVs. A query that keeps returning nothing gets reworked by the planner, not
+  by a rule you maintain.
+- **Reads and screens every posting.** Cheap triage on the headers first, a full read of the
+  description for the survivors, then a verdict with the stack, the level, the workplace, the
+  contract basis and a score. Everything it skips, it skips out loud, with the reason in one
+  sentence.
+- **Attaches the right CV on its own.** Keep as many variants as you like — `backend/`, `go/`,
+  `backend-tr/`. When you open a posting and press Easy Apply, the variant that fits that posting
+  is already on the form. It never presses submit; that stays yours.
+- **Learns from your outcomes.** Record what an application produced and the reflector turns it
+  into standing notes that ride in every later prompt.
+- **Stays on your machine.** The store, your CV pdfs and your LinkedIn session never leave it,
+  and it runs on the Claude subscription you already have — no key to paste, no second bill.
+
 ## Why it exists
 
 Applying for jobs is a queue problem. The feed is endless, most of it is wrong for you, and the
