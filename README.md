@@ -18,8 +18,6 @@ you point it at.
   <img src="docs/media/promo.gif" width="720" alt="The 21 second tour">
 </p>
 
-<p align="center"><a href="https://github.com/cemalturkcan/linkedin-agent/releases/download/promo-v1/promo.mp4">Watch it with sound</a></p>
-
 ## What it does
 
 - **Aims the search for you.** Every hour a planner decides where to look, using the places you
