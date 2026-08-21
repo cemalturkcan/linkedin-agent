@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 import { AgentClient } from '@/lib/agent/client'
 import type { Settings } from '@/lib/agent/types'
-import { attachFor, base64Of, syncApplied, type ApplyPorts } from '@/worker/apply'
+import { attachFor, base64Of, previewFor, syncApplied, type ApplyPorts } from '@/worker/apply'
 import type { FormReading, InjectionResult } from '@/worker/inject'
 
 const BASE = 'http://127.0.0.1:9787'
@@ -10,6 +10,8 @@ interface Stage {
   settings?: Partial<Settings['apply']>
   jobs?: Record<string, unknown>[]
   resumes?: { code: string; label: string; role: string; languages: string[] }[]
+  profiles?: Record<string, unknown>[]
+  describe?: { title: string; body: string } | null
   reading?: Partial<FormReading>
   select?: InjectionResult
   attach?: InjectionResult
@@ -45,6 +47,17 @@ function stage(options: Stage = {}) {
     }
     if (url.pathname === '/api/jobs') {
       return Response.json({ jobs: options.jobs ?? [] })
+    }
+    if (url.pathname === '/api/profile') {
+      return Response.json({
+        resumeDir: '/cv',
+        candidate: null,
+        indexedAt: '',
+        resumes: options.profiles ?? [],
+        indexState: 'current',
+        indexing: false,
+        progress: { phase: '', done: 0, total: 0 },
+      })
     }
     if (url.pathname === '/api/resumes') {
       return Response.json({
@@ -88,8 +101,31 @@ function stage(options: Stage = {}) {
       },
     },
     armed: async () => options.armed ?? null,
+    describe: async () => options.describe ?? null,
   }
   return { ports, calls, selected, uploaded, remembered }
+}
+
+function indexed(code: string, core: string[]): Record<string, unknown> {
+  return {
+    code,
+    label: code.toLowerCase(),
+    fileLanguages: ['en'],
+    indexed: true,
+    profile: {
+      code,
+      targetRole: '',
+      seniorityClaimed: '',
+      coreStack: core,
+      secondaryStack: [],
+      domains: [],
+      languages: [],
+      yearsClaimed: 0,
+      earliestStart: '',
+      places: [],
+      summary: '',
+    },
+  }
 }
 
 const assigned = [{ id: '1', status: 'inbox', resumeCode: 'BE', resumeLang: 'en' }]
@@ -129,6 +165,138 @@ test('the armed resume stands in when the agent has no verdict yet', async () =>
   const outcome = await attachFor(test_.ports, '1', 9)
   expect(outcome.ok).toBe(true)
   if (outcome.ok) expect(outcome.name).toBe('resume-be-en.pdf')
+})
+
+test('the posting text picks the closest cv over the armed default', async () => {
+  const test_ = stage({
+    jobs: [],
+    resumes: [
+      { code: 'BE', label: 'backend', role: 'backend', languages: ['en'] },
+      { code: 'JA', label: 'java', role: 'java', languages: ['en'] },
+    ],
+    profiles: [indexed('BE', ['go', 'postgres']), indexed('JA', ['java', 'spring boot'])],
+    describe: { title: 'Senior Java Developer', body: 'java services on spring boot' },
+    armed: { code: 'BE', label: 'backend', languages: ['en'], at: 0 },
+  })
+  const outcome = await attachFor(test_.ports, '1', 9)
+
+  expect(outcome.ok).toBe(true)
+  if (outcome.ok) {
+    expect(outcome.name).toBe('resume-ja-en.pdf')
+    expect(outcome.why).toContain('closest to JA')
+  }
+})
+
+test('a posting that reads like nothing on file falls back to the armed cv', async () => {
+  const test_ = stage({
+    jobs: [],
+    profiles: [indexed('BE', ['go', 'postgres']), indexed('JA', ['java', 'spring boot'])],
+    describe: { title: 'Retail Store Manager', body: 'staff scheduling and inventory' },
+    armed: { code: 'BE', label: 'backend', languages: ['en'], at: 0 },
+  })
+  const outcome = await attachFor(test_.ports, '1', 9)
+
+  expect(outcome.ok).toBe(true)
+  if (outcome.ok) expect(outcome.name).toBe('resume-be-en.pdf')
+})
+
+test('arming a cv while the step is open re-attaches over the once guard', async () => {
+  const test_ = stage({
+    jobs: [],
+    attached: ['1'],
+    armed: { code: 'BE', label: 'backend', languages: ['en'], at: 0 },
+  })
+  const outcome = await attachFor(test_.ports, '1', 9, true)
+
+  expect(outcome.ok).toBe(true)
+  if (outcome.ok) expect(outcome.name).toBe('resume-be-en.pdf')
+})
+
+test('a rearm attaches the armed cv itself, not the closest one', async () => {
+  const test_ = stage({
+    jobs: [],
+    profiles: [indexed('JA', ['java', 'spring boot'])],
+    describe: { title: 'Senior Java Developer', body: 'java services on spring boot' },
+    resumes: [
+      { code: 'BE', label: 'backend', role: 'backend', languages: ['en'] },
+      { code: 'JA', label: 'java', role: 'java', languages: ['en'] },
+    ],
+    armed: { code: 'BE', label: 'backend', languages: ['en'], at: 0 },
+  })
+  const outcome = await attachFor(test_.ports, '1', 9, true)
+
+  expect(outcome.ok).toBe(true)
+  if (outcome.ok) expect(outcome.name).toBe('resume-be-en.pdf')
+})
+
+test('a rearm never overrides the cv the agent already attached', async () => {
+  const test_ = stage({
+    jobs: assigned,
+    attached: ['1'],
+    armed: { code: 'FE', label: 'frontend', languages: ['en'], at: 0 },
+  })
+  const outcome = await attachFor(test_.ports, '1', 9, true)
+
+  expect(outcome.ok).toBe(false)
+  if (!outcome.ok) expect(outcome.reason).toBe('already-attached')
+  expect(test_.uploaded).toEqual([])
+})
+
+test('the preview names the closest cv for a posting the agent never judged', async () => {
+  const test_ = stage({
+    jobs: [],
+    resumes: [
+      { code: 'BE', label: 'backend', role: 'backend', languages: ['en'] },
+      { code: 'JA', label: 'java', role: 'java', languages: ['en'] },
+    ],
+    profiles: [indexed('BE', ['go', 'postgres']), indexed('JA', ['java', 'spring boot'])],
+    describe: { title: 'Senior Java Developer', body: 'java services on spring boot' },
+    armed: { code: 'BE', label: 'backend', languages: ['en'], at: 0 },
+  })
+  const preview = await previewFor(test_.ports, '1')
+
+  expect(preview.code).toBe('JA')
+  expect(preview.lang).toBe('en')
+  expect(preview.source).toBe('closest')
+  expect(preview.why).toContain('closest to JA')
+})
+
+test('the preview never displaces the agent pick', async () => {
+  const test_ = stage({
+    jobs: assigned,
+    armed: { code: 'FE', label: 'frontend', languages: ['en'], at: 0 },
+  })
+  const preview = await previewFor(test_.ports, '1')
+
+  expect(preview.code).toBe('BE')
+  expect(preview.source).toBe('agent')
+})
+
+test('the preview falls back to the armed cv and says why', async () => {
+  const test_ = stage({
+    jobs: [],
+    profiles: [indexed('JA', ['java', 'spring boot'])],
+    describe: { title: 'Retail Store Manager', body: 'staff scheduling' },
+    armed: { code: 'BE', label: 'backend', languages: ['en'], at: 0 },
+  })
+  const preview = await previewFor(test_.ports, '1')
+
+  expect(preview.code).toBe('BE')
+  expect(preview.source).toBe('armed')
+  expect(preview.why).toContain('armed cv stands')
+})
+
+test('the preview says so when the posting text cannot be read at all', async () => {
+  const test_ = stage({
+    jobs: [],
+    profiles: [indexed('JA', ['java'])],
+    describe: null,
+    armed: { code: 'BE', label: 'backend', languages: ['en'], at: 0 },
+  })
+  const preview = await previewFor(test_.ports, '1')
+
+  expect(preview.code).toBe('BE')
+  expect(preview.why).toContain('could not be read')
 })
 
 test('a posting already judged elsewhere is never attached to', async () => {

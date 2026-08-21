@@ -105,15 +105,18 @@ async function tick() {
   if (owner.done || Date.now() - owner.lastTry < RETRY_MS) return
   owner.lastTry = Date.now()
 
-  const outcome = await send({ type: 'apply:step', id: owner.id })
+  const outcome = await send({ type: 'apply:step', id: owner.id, rearm: owner.rearm === true })
   if (posting !== owner || !outcome) return
+  owner.rearm = false
   if (outcome.ok) owner.done = true
   else if (SETTLED.includes(outcome.reason)) owner.done = true
 }
 
 function retry() {
-  if (!posting || posting.done) return
+  if (!posting) return
+  posting.done = false
   posting.lastTry = 0
+  posting.rearm = true
   schedule()
 }
 
@@ -143,7 +146,7 @@ function observeRoots() {
 
 function watch(id) {
   stop()
-  posting = { id, done: false, everOpen: false, lastTry: 0, lastCheck: 0 }
+  posting = { id, done: false, everOpen: false, lastTry: 0, lastCheck: 0, rearm: false }
   observeRoots()
   schedule()
 }

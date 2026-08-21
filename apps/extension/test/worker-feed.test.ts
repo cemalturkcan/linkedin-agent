@@ -64,7 +64,7 @@ function harness(
           return { jobs: [], total: 0 }
         },
         async posting(id) {
-          return { id, description: '', applied: false, closed: false }
+          return { id, title: '', description: '', applied: false, closed: false }
         },
         async place(name) {
           places.push(name)

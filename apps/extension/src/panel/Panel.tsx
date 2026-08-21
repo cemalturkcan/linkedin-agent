@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { agent } from '@/lib/agent/client'
 import type { Posting, Transition } from '@/lib/agent/types'
-import { attachmentFor } from '@/lib/armed'
+import { attachmentFor, type PickPreview } from '@/lib/armed'
 import { followKeyOf, showsPosting } from '@/lib/linkedin/posting'
+import { uploadName } from '@/lib/linkedin/resume'
+import { previewPick } from '@/lib/worker'
 import { openDesk, openTab } from '@/lib/open'
 import { derivePlaceNames, deriveTerms } from '@/lib/presets'
 import { useHotkeys, type HotkeyHandler } from '@/lib/useHotkeys'
@@ -66,15 +68,35 @@ export function Panel() {
     : null
   const terms = useMemo(() => deriveTerms(state.profile.value), [state.profile.value])
   const places = useMemo(() => derivePlaceNames(state.profile.value), [state.profile.value])
-  const attachment = useMemo(
-    () =>
-      attachmentFor(
-        openPosting,
-        state.armedPreset,
-        state.settings.value?.settings.apply ?? null,
-      ),
-    [openPosting, state.armedPreset, state.settings.value],
-  )
+  const [preview, setPreview] = useState<PickPreview | null>(null)
+  useEffect(() => {
+    setPreview(null)
+    if (!onPosting || !following.postingId) return
+    let stale = false
+    void previewPick(following.postingId).then((answer) => {
+      if (!stale && answer?.ok && answer.preview) setPreview(answer.preview)
+    })
+    return () => {
+      stale = true
+    }
+  }, [onPosting, following.postingId, state.armedPreset, state.jobs.value])
+
+  const attachment = useMemo(() => {
+    const applied = state.settings.value?.settings.apply ?? null
+    const base = attachmentFor(openPosting, state.armedPreset, applied)
+    if (!preview?.code || base.source === 'agent' || base.source === 'chosen') return base
+    const lang = preview.lang ?? base.lang ?? ''
+    return {
+      ...base,
+      code: preview.code,
+      lang: lang || null,
+      source: preview.source,
+      why: preview.why,
+      attachesAs: applied
+        ? uploadName(applied.uploadFileName, preview.code, lang, applied.uploadFileNameMode)
+        : base.attachesAs,
+    }
+  }, [openPosting, state.armedPreset, state.settings.value, preview])
 
   function chooseTab(wanted: Tab) {
     setTab(wanted)

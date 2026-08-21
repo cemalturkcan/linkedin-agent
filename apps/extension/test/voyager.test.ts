@@ -129,6 +129,7 @@ test('a captured search page parses into cards and drops what is not one', () =>
 test('a posting keeps the longest body and reads linkedin own applied state', () => {
   const body = parsePosting('4051234567', posting)
   expect(body.id).toBe('4051234567')
+  expect(body.title).toBe('Backend Engineer')
   expect(body.description.startsWith('We are hiring a backend engineer')).toBe(true)
   expect(body.applied).toBe(true)
   expect(body.closed).toBe(false)

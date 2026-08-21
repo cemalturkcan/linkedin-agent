@@ -211,7 +211,7 @@ export function harness(options: HarnessOptions = {}): Harness {
       async posting(id) {
         postings.push(id)
         if (options.posting) return options.posting(id)
-        return { id, description: 'a body', applied: false, closed: false }
+        return { id, title: '', description: 'a body', applied: false, closed: false }
       },
       async place(name) {
         places.push(name)

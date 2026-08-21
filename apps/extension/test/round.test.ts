@@ -491,6 +491,7 @@ test('the bodies the agent asks for are fetched and posted back', async () => {
     },
     posting: async (id) => ({
       id,
+      title: `title of ${id}`,
       description: `body of ${id}`,
       applied: id === '2',
       closed: false,

@@ -31,7 +31,7 @@ export interface Armed {
   at: number
 }
 
-export type PickSource = 'agent' | 'armed'
+export type PickSource = 'agent' | 'armed' | 'closest'
 
 export interface ResumePick {
   code: string
@@ -86,6 +86,13 @@ export interface ApplySettings {
 }
 
 export type AttachSource = PickSource | 'chosen' | 'none'
+
+export interface PickPreview {
+  code: string | null
+  lang: string | null
+  source: AttachSource
+  why: string
+}
 
 export interface Attachment {
   code: string | null
@@ -146,8 +153,8 @@ export function attachmentFor(
       : source === 'agent'
         ? 'the agent picked this cv for this posting'
         : known
-          ? 'the agent assigned no cv to this posting, so the armed one attaches'
-          : 'the agent has never judged this posting, which is normal for one you found yourself, so the armed one attaches'
+          ? 'the agent assigned no cv to this posting, so the cv closest to its text attaches, and the armed one when nothing is close'
+          : 'the agent has never judged this posting, which is normal for one you found yourself, so the cv closest to its text attaches, and the armed one when nothing is close'
 
   return {
     code: pick.code,

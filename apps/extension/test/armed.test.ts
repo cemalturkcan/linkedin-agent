@@ -145,7 +145,9 @@ test('a posting the agent judged without a cv falls to the armed one', async () 
 
   expect(attachment.code).toBe('AA')
   expect(attachment.source).toBe('armed')
-  expect(attachment.why).toBe('the agent assigned no cv to this posting, so the armed one attaches')
+  expect(attachment.why).toBe(
+    'the agent assigned no cv to this posting, so the cv closest to its text attaches, and the armed one when nothing is close',
+  )
 })
 
 test('a posting the agent never judged says so plainly', async () => {

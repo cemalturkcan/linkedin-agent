@@ -60,6 +60,7 @@ export interface SearchPage {
 
 export interface PostingBody {
   id: string
+  title: string
   description: string
   applied: boolean
   closed: boolean
@@ -217,6 +218,7 @@ export function parseTotal(document: unknown): number {
 }
 
 const APPLYING_INFO = /jobapplyinginfo/i
+const JOB_POSTING = /jobposting/i
 
 function isApplyingInfo(node: Record<string, unknown>): boolean {
   return (
@@ -231,19 +233,28 @@ export function parsePosting(id: string, document: unknown): PostingBody {
     (node): node is Record<string, unknown> => Boolean(node) && typeof node === 'object',
   )
 
+  let title = ''
+  let named = ''
   let description = ''
   let applied = false
   let closed = false
   for (const node of nodes) {
     const body = text(node.description).trim()
-    if (body.length > description.length) description = body
+    if (body.length > description.length) {
+      description = body
+      named = text(node.title).trim()
+    }
+    if (JOB_POSTING.test(`${node.$type ?? ''} ${node.entityUrn ?? ''}`)) {
+      const carried = text(node.title).trim()
+      if (carried.length > title.length) title = carried
+    }
     if (isApplyingInfo(node)) {
       if (node.applied === true) applied = true
       if (node.closed === true) closed = true
     }
     if (node.jobState === 'CLOSED' || node.closedAt) closed = true
   }
-  return { id: String(id), description, applied, closed }
+  return { id: String(id), title: named || title, description, applied, closed }
 }
 
 export interface VoyagerOptions {

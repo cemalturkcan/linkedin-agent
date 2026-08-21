@@ -79,6 +79,15 @@ offering, and it retries at once when a cv is armed rather than waiting out its 
 once and going quiet is how a person ends up staring at a step that says it will attach and never
 does.
 
+The content scripts match every linkedin page, not only `/jobs/*`, because the person reaches a
+posting through LinkedIn's own navigation without a document load, and a script scoped to `/jobs`
+never runs in a tab entered anywhere else. The cv step picks in a fixed order: the agent's own pick
+always wins; a posting without one takes the cv whose indexed profile sits closest to the posting's
+title and description, read from the store or fetched by id; and the armed cv stands in when nothing
+scores close enough or the profiles are not indexed. Arming is also an act of its own: it re-attaches
+at once while the step is open, over the one-attach-per-posting guard, and it never displaces a cv
+the agent itself picked.
+
 The log section records what the extension did: the rounds it ran, every cv it attached or refused
 to attach and the reason, and the times the agent did not answer. It records by default, it is kept
 in the browser and sent nowhere, it holds the last few hundred lines, and it can be switched off and

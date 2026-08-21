@@ -8,6 +8,7 @@ const SOURCE_WORD: Record<Attachment['source'], string> = {
   agent: 'the agent’s own pick',
   chosen: 'the cv you chose for it',
   armed: 'the cv you armed',
+  closest: 'the cv closest to the posting text',
   none: 'nothing armed',
 }
 
@@ -110,8 +111,9 @@ export function ResumeStep({
           })}
         </div>
         <p className="mt-1.5 text-meta text-muted">
-          arming a cv here changes what attaches on every posting the agent has no pick for, not
-          only this one.
+          the agent&apos;s pick always comes first. without one the cv closest to the posting text
+          attaches, the armed one stands in when nothing is close, and arming while an application
+          is open puts that cv on at once.
         </p>
       </section>
     </div>

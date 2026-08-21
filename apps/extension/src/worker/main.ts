@@ -27,6 +27,7 @@ import {
   attachFor,
   ATTACHED_KEY,
   ATTACHED_MAX,
+  previewFor,
   syncApplied,
   type AttachedPort,
   type PagePort,
@@ -202,6 +203,26 @@ const page: PagePort = {
       { ok: false, reason: 'no-input', matches: 0 },
     )
   },
+}
+
+const DESCRIBED_MAX = 50
+const described = new Map<string, { title: string; body: string } | null>()
+
+async function describe(id: string): Promise<{ title: string; body: string } | null> {
+  const held = described.get(id)
+  if (held !== undefined) return held
+  try {
+    const body = await voyager.posting(id)
+    const read = { title: body.title, body: body.description }
+    described.set(id, read)
+    if (described.size > DESCRIBED_MAX) {
+      const oldest = described.keys().next().value
+      if (oldest !== undefined) described.delete(oldest)
+    }
+    return read
+  } catch {
+    return null
+  }
 }
 
 async function rememberAttempt(
@@ -399,7 +420,7 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
       respond({ ok: false, reason: 'no-tab', why: 'this page has no tab to attach into' })
       return true
     }
-    attachFor({ agent, page, attached }, String(message.id), tabId)
+    attachFor({ agent, page, attached, describe }, String(message.id), tabId, message.rearm === true)
       .then(async (outcome) => {
         await rememberAttempt(String(message.id), outcome)
         respond(outcome)
@@ -409,6 +430,13 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
         await rememberAttempt(String(message.id), outcome)
         respond(outcome)
       })
+    return true
+  }
+
+  if (message.type === 'apply:pick') {
+    previewFor({ agent, page, attached, describe }, String(message.id))
+      .then((preview) => respond({ ok: true, preview }))
+      .catch(() => respond({ ok: false, preview: null }))
     return true
   }
 

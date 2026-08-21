@@ -1,3 +1,4 @@
+import type { PickPreview } from '@/lib/armed'
 import type { FeedKnobs } from '@/lib/linkedin/feed'
 import type { PlaceHit } from '@/lib/linkedin/geo'
 import type { RoundReport, RoundUpdate } from '@/lib/linkedin/round'
@@ -32,6 +33,15 @@ export function announceNow(): Promise<{ ok: boolean } | null> {
 
 export function runRoundNow(): Promise<RoundAnswer | null> {
   return ask<RoundAnswer>({ type: 'round:run' })
+}
+
+export interface PickAnswer {
+  ok: boolean
+  preview: PickPreview | null
+}
+
+export function previewPick(id: string): Promise<PickAnswer | null> {
+  return ask<PickAnswer>({ type: 'apply:pick', id })
 }
 
 export interface LastRoundAnswer {

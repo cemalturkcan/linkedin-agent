@@ -540,7 +540,14 @@ async function readBodies(context: Context): Promise<string> {
     try {
       await pace(context)
       const body = await context.ports.linkedin.posting(id, context.requestTimeoutMs)
-      if (body.description || body.applied || body.closed) bodies.push(body)
+      if (body.description || body.applied || body.closed) {
+        bodies.push({
+          id: body.id,
+          description: body.description,
+          applied: body.applied,
+          closed: body.closed,
+        })
+      }
     } catch (error) {
       const blocking = await onLinkedInFailure(context, error)
       if (blocking) {
